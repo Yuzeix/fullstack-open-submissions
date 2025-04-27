@@ -28,9 +28,10 @@ const Part = ({ partName, excerciseCount }) => {
 } 
 
 const App = () => {
-  const course = 'Half Stack application development'
+  const course = {
+    name: 'Half Stack application development',
 
-  const parts = [
+    parts: [
     {
       name: 'Fundamentals of React',
       exercises: 10 
@@ -44,16 +45,17 @@ const App = () => {
       exercises: 14 
     }
   ]
+}
 
 
   return (
     <div>
-      <Header course={course}/>
+      <Header course={course.name}/>
       <Content 
-        parts={parts}
+        parts={course.parts}
       />
       <Total 
-        parts={parts} 
+        parts={course.parts} 
       />
     </div>
   )
