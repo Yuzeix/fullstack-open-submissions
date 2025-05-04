@@ -7,9 +7,9 @@ const Header = ({ course }) => {
 const Content = ({ parts }) => {
   return (
     <div>
-        <Part partName={parts[0].name} excerciseCount={parts[0].exercises}/>
-        <Part partName={parts[1].name} excerciseCount={parts[1].exercises}/>
-        <Part partName={parts[2].name} excerciseCount={parts[2].exercises}/>
+        <Part partName={parts[0].name} exerciseCount={parts[0].exercises}/>
+        <Part partName={parts[1].name} exerciseCount={parts[1].exercises}/>
+        <Part partName={parts[2].name} exerciseCount={parts[2].exercises}/>
     </div>        
   )
 }
@@ -19,10 +19,10 @@ const Total = ({ parts }) => {
   return <p>Number of exercises {totalExercises}</p> 
 }
 
-const Part = ({ partName, excerciseCount }) => {
+const Part = ({ partName, exerciseCount }) => {
   return (
     <p>
-      {partName} {excerciseCount}
+      {partName} {exerciseCount}
    </p>
   )
 } 
