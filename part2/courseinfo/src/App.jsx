@@ -1,3 +1,10 @@
+
+const Total = ({ totalEx }) => {
+  return (
+    <p>Total Exercises is {totalEx}</p>
+  )
+}
+
 const Part = ({ part }) => {
   return (
     <p>
@@ -5,7 +12,6 @@ const Part = ({ part }) => {
    </p>
   )
 } 
-
 
 const Content = ({ parts }) => {
   return (
@@ -24,13 +30,17 @@ const Header = ({ courseName }) => {
 }
 
 const Course = ({ course }) => {
+  const totalExercises = course.parts.reduce((sum, part) => {
+    return sum + part.exercises;
+  }, 0);
+
   return (
     <div>
       <Header courseName={course.name}/>
       <Content parts={course.parts}/>
+      <Total totalEx={totalExercises}/>
     </div>
   )
-
 }
 
 const App = () => {
@@ -55,9 +65,14 @@ const App = () => {
         id: 3
       },
       {
-        name: 'hooks',
-        exercises: 6,
+        name: 'Hooks',
+        exercises: 7,
         id: 4
+      },
+      {
+        name: 'Database operations',
+        exercises: 9,
+        id: 5
       }
     ]
   }
