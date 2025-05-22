@@ -15,11 +15,11 @@ const App = () => {
   const [filterTerm, setFilterTerm] = useState('')
 
   useEffect(() => {
-  axios
-  .get('http://localhost:3014/persons')
-  .then(response => {
-    setPersons(response.data)
-    });
+    axios
+    .get('http://localhost:3002/persons')
+    .then(response => {
+      setPersons(response.data)
+      });
   }, []);
 
   const handleNameChange = (event) => {
@@ -47,27 +47,31 @@ const App = () => {
 
     const isDuplicate = persons.some(person =>
       person.name.trim().toLowerCase() === nameToCheck);
-
-    const personObject = {
-      name: newName,
-      number: newNumber,
-      id: persons.length > 0 ? Math.max(...persons.map(p => p.id)) + 1 : 1
-    }
-
+   
     if (isDuplicate) {
 
       alert(`${newName} is already added to phonebook`);
       return;
+    } 
 
-    } else {
-
-      setPersons(persons.concat(personObject))
-
-      setNewName('');
-      setNewNumber('')
-
+    const personObject = {
+      name: newName,
+      number: newNumber,     
     }
-  }
+
+    axios
+      .post('http://localhot:3002/persons', personObject)
+      .then(response => {
+        setPersons(persons.concat(response.data));
+
+        setNewName('');
+        setNewNumber('');
+      })
+      .catch(error => {
+        alert('Failed to load initial data from the server. Ensure json-server is running on port 3002.');
+      }); 
+    }
+  
 
   return (
     <div>
