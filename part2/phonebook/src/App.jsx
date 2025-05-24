@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import axios from 'axios'
+import PersonsServices from './Services/PersonsServices'
 import Filter from './Components/Filter'
 import Persons from './Components/Persons'
 import PersonForm from './Components/PersonForm'
@@ -15,11 +15,14 @@ const App = () => {
   const [filterTerm, setFilterTerm] = useState('')
 
   useEffect(() => {
-    axios
-    .get('http://localhost:3002/persons')
-    .then(response => {
-      setPersons(response.data)
-      });
+    PersonsServices
+    .getAll()
+    .then(initialPersons => {
+      setPersons(initialPersons)
+    })
+    .catch(error => {
+      alert('Failed to retrieve data from the service.')
+    })
   }, []);
 
   const handleNameChange = (event) => {
@@ -59,10 +62,10 @@ const App = () => {
       number: newNumber,     
     }
 
-    axios
-      .post('http://localhot:3002/persons', personObject)
-      .then(response => {
-        setPersons(persons.concat(response.data));
+    PersonsServices
+      .create(personObject)
+      .then(newPerson => {
+        setPersons(persons.concat(newPerson));
 
         setNewName('');
         setNewNumber('');
