@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import PersonsServices from "./Services/PersonsServices";
+import personsServices from "./Services/PersonsServices";
 import Filter from "./Components/Filter";
 import Persons from "./Components/Persons";
 import PersonForm from "./Components/PersonForm";
@@ -14,14 +14,14 @@ const App = () => {
   const [filterTerm, setFilterTerm] = useState("");
 
   useEffect(() => {
-    PersonsServices
-    .getAll()
-    .then((initialPersons) => {
-      setPersons(initialPersons);
+    personsServices
+      .getAll()
+      .then((initialPersons) => {
+        setPersons(initialPersons);
       })
-    .catch((error) => {
-      alert("Failed to retrieve data from the service.");
-    });
+      .catch((error) => {
+        alert("Failed to retrieve data from the service.");
+      });
   }, []);
 
   const handleNameChange = (event) => {
@@ -36,20 +36,21 @@ const App = () => {
     setFilterTerm(event.target.value);
   };
 
-  const handleRemovePerson = ( id, name ) => {
+  const handleRemovePerson = (id, name) => {
     if (window.confirm(`Delete ${name} ?`)) {
-      PersonsServices
-      .removePerson(id)
-      .then(() => {
-        setPersons(persons.filter(p => p.id !== id));
-    })
-      .catch(error => {
-      alert (`The Person '${name}' was already deleted from server.`);
-      setPersons(persons.filter(p => p.id !== id));
-    });  
-  } else {
-    console.log(`Deletion canceled by the user for id: ${id}`);
-  }};
+      personsServices
+        .removePerson(id)
+        .then(() => {
+          setPersons(persons.filter((p) => p.id !== id));
+        })
+        .catch((error) => {
+          alert(`The Person '${name}' was already deleted from server.`);
+          setPersons(persons.filter((p) => p.id !== id));
+        });
+    } else {
+      console.log(`Deletion canceled by the user for id: ${id}`);
+    }
+  };
 
   const personsToShow =
     filterTerm === ""
@@ -63,32 +64,53 @@ const App = () => {
 
     const nameToCheck = newName.trim().toLowerCase();
 
-    const isDuplicate = persons.some(
+    const isDuplicate = persons.find(
       (person) => person.name.trim().toLowerCase() === nameToCheck
     );
 
     if (isDuplicate) {
-      alert(`${newName} is already added to phonebook`);
-      return;
+      if (
+        window.confirm(
+          `${newName} is already added to phonebook, replace the old number with a new one?`
+        )
+      ) {
+        const updatedPerson = { ...isDuplicate, number: newNumber };
+
+        personsServices
+          .updateNumber(isDuplicate.id, updatedPerson)
+          .then((returnedPerson) => {
+            setPersons(
+              persons.map((p) => (p.id !== isDuplicate.id ? p : returnedPerson))
+            );
+            setNewName("");
+            setNewNumber("");
+            alert(`Updated ${returnedPerson.name} number successfully`);
+          })
+          .catch((error) => {
+            alert(
+              `Error updating ${isDuplicate.name} could not update person. They might have been removed or server error.`
+            );
+          });
+      }
+    } else {
+      const personObject = {
+        name: newName,
+        number: newNumber,
+      };
+
+      personsServices
+        .create(personObject)
+        .then((returnedPerson) => {
+          setPersons(persons.concat(returnedPerson));
+          setNewName("");
+          setNewNumber("");
+        })
+        .catch((error) => {
+          alert(
+            `Failed to load initial data from the server. Ensure json-server is running on port 3004.`
+          );
+        });
     }
-
-    const personObject = {
-      name: newName,
-      number: newNumber,
-    };
-
-    PersonsServices.create(personObject)
-      .then((newPerson) => {
-        setPersons(persons.concat(newPerson));
-
-        setNewName("");
-        setNewNumber("");
-      })
-      .catch((error) => {
-        alert(
-          "Failed to load initial data from the server. Ensure json-server is running on port 3004."
-        );
-      });
   };
 
   return (
@@ -103,7 +125,10 @@ const App = () => {
         handleNumberChange={handleNumberChange}
       />
       <h2>Numbers</h2>
-      <Persons personsToShow={personsToShow} handleRemovePerson={handleRemovePerson}/>
+      <Persons
+        personsToShow={personsToShow}
+        handleRemovePerson={handleRemovePerson}
+      />
     </div>
   );
 };

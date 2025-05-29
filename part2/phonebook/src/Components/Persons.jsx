@@ -3,7 +3,8 @@ const Persons = ({ personsToShow, handleRemovePerson }) => {
     <div>
       {personsToShow.map((person) => (
         <p key={person.id}>
-          {person.name} : {person.number} <button onClick={() => handleRemovePerson(person.id, person.name)}>
+          {person.name} : {person.number}{" "}
+          <button onClick={() => handleRemovePerson(person.id, person.name)}>
             delete
           </button>
         </p>
