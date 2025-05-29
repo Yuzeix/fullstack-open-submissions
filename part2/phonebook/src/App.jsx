@@ -3,6 +3,8 @@ import personsServices from "./Services/PersonsServices";
 import Filter from "./Components/Filter";
 import Persons from "./Components/Persons";
 import PersonForm from "./Components/PersonForm";
+import Notification from "./Components/Notification";
+import './index.css'
 
 const App = () => {
   const [persons, setPersons] = useState([]);
@@ -12,6 +14,8 @@ const App = () => {
   const [newNumber, setNewNumber] = useState("");
 
   const [filterTerm, setFilterTerm] = useState("");
+
+  const [successMessage, setSuccessMessage] = useState(null);
 
   useEffect(() => {
     personsServices
@@ -42,6 +46,10 @@ const App = () => {
         .removePerson(id)
         .then(() => {
           setPersons(persons.filter((p) => p.id !== id));
+          setSuccessMessage(`${name} has already been successfully deleted.`);
+            setTimeout(() => {
+              setSuccessMessage(null);
+            }, 5000);
         })
         .catch((error) => {
           alert(`The Person '${name}' was already deleted from server.`);
@@ -84,7 +92,10 @@ const App = () => {
             );
             setNewName("");
             setNewNumber("");
-            alert(`Updated ${returnedPerson.name} number successfully`);
+            setSuccessMessage(`Updated ${returnedPerson.name} number successfully`);
+            setTimeout(() => {
+              setSuccessMessage(null);
+            }, 5000);
           })
           .catch((error) => {
             alert(
@@ -104,6 +115,10 @@ const App = () => {
           setPersons(persons.concat(returnedPerson));
           setNewName("");
           setNewNumber("");
+          setSuccessMessage(`Added ${returnedPerson.name}`);
+            setTimeout(() => {
+              setSuccessMessage(null);
+            }, 5000);
         })
         .catch((error) => {
           alert(
@@ -116,6 +131,7 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification successMessage={successMessage}/>
       <Filter filterTerm={filterTerm} handleFilterChange={handleFilterChange} />
       <PersonForm
         addPerson={addPerson}
