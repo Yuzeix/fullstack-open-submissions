@@ -4,7 +4,7 @@ import Filter from "./Components/Filter";
 import Persons from "./Components/Persons";
 import PersonForm from "./Components/PersonForm";
 import Notification from "./Components/Notification";
-import './index.css'
+import "./index.css";
 
 const App = () => {
   const [persons, setPersons] = useState([]);
@@ -15,7 +15,9 @@ const App = () => {
 
   const [filterTerm, setFilterTerm] = useState("");
 
-  const [successMessage, setSuccessMessage] = useState(null);
+  const [notificationMessage, setNotificationMessage] = useState(null);
+
+  const [notificationType, setNotificationType] = useState("success");
 
   useEffect(() => {
     personsServices
@@ -24,9 +26,21 @@ const App = () => {
         setPersons(initialPersons);
       })
       .catch((error) => {
-        alert("Failed to retrieve data from the service.");
+        console.error("Failed to load initial people", error);
+        showNotification(
+          `Error loading data ${error.message || "Server unavailable"}`,
+          "error"
+        ); 
       });
   }, []);
+
+  const showNotification = (message, type = "success") => {
+    setNotificationMessage(message);
+    setNotificationType(type);
+    setTimeout(() => {
+      setNotificationMessage(null);
+    }, 5000);
+  };
 
   const handleNameChange = (event) => {
     setNewName(event.target.value);
@@ -46,14 +60,19 @@ const App = () => {
         .removePerson(id)
         .then(() => {
           setPersons(persons.filter((p) => p.id !== id));
-          setSuccessMessage(`${name} has already been successfully deleted.`);
-            setTimeout(() => {
-              setSuccessMessage(null);
-            }, 5000);
+          showNotification(
+            `${name} deleted.`,
+            "success"
+          );
         })
         .catch((error) => {
-          alert(`The Person '${name}' was already deleted from server.`);
-          setPersons(persons.filter((p) => p.id !== id));
+          showNotification(
+            `Error deleting ${name}. They might have already been removed or a server error occurred.`,
+            "error"
+          );
+          if (error.response && error.response.status === 404) {
+            setPersons(persons.filter((p) => p.id !== id));
+          }
         });
     } else {
       console.log(`Deletion canceled by the user for id: ${id}`);
@@ -92,15 +111,23 @@ const App = () => {
             );
             setNewName("");
             setNewNumber("");
-            setSuccessMessage(`Updated ${returnedPerson.name} number successfully`);
-            setTimeout(() => {
-              setSuccessMessage(null);
-            }, 5000);
+            showNotification(
+              `Updated ${returnedPerson.name} number successfully`,
+              "success"
+            );
           })
           .catch((error) => {
-            alert(
-              `Error updating ${isDuplicate.name} could not update person. They might have been removed or server error.`
-            );
+            if (error.response?.status === 404) {
+              showNotification(
+                `Information of ${isDuplicate.name} has already been removed from server`, 'error'
+              );
+              setPersons(persons.filter((p) => p.id !== isDuplicate.id));
+            } else {
+              const errorMsg =
+                error.response?.data?.error ||
+                `Could not update ${isDuplicate.name}.`;
+              showNotification(errorMsg, "error");
+            }
           });
       }
     } else {
@@ -115,15 +142,13 @@ const App = () => {
           setPersons(persons.concat(returnedPerson));
           setNewName("");
           setNewNumber("");
-          setSuccessMessage(`Added ${returnedPerson.name}`);
-            setTimeout(() => {
-              setSuccessMessage(null);
-            }, 5000);
+          showNotification(`Added ${returnedPerson.name}`, "success");
         })
         .catch((error) => {
-          alert(
-            `Failed to load initial data from the server. Ensure json-server is running on port 3004.`
-          );
+          const errorMsg =
+            error.response?.data?.error ||
+            `Could not add ${personObject.name}.`;
+          showNotification(errorMsg, "error");
         });
     }
   };
@@ -131,7 +156,7 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
-      <Notification successMessage={successMessage}/>
+      <Notification message={notificationMessage} type={notificationType} />
       <Filter filterTerm={filterTerm} handleFilterChange={handleFilterChange} />
       <PersonForm
         addPerson={addPerson}

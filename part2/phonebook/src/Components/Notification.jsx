@@ -1,9 +1,12 @@
-Notification = ({ successMessage }) => {
-  if (successMessage === null) {
+Notification = ({ message, type }) => {
+
+  if (message === null) {
     return null;
   }
 
-  return <div className="success">{successMessage}</div>;
+  const notificationClassName = `notification ${type}`
+
+  return <div className={notificationClassName}>{message}</div>;
 };
 
 export default Notification;
